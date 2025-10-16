@@ -99,13 +99,34 @@ export default {
 				'flicker': {
 					'0%, 100%': { opacity: '1' },
 					'50%': { opacity: '0.8' }
+				},
+				'drip3': {
+					'0%': { height: '0', opacity: '0' },
+					'10%': { opacity: '1' },
+					'60%': { height: '150%', opacity: '0.9' },
+					'100%': { height: '150%', opacity: '0' }
+				},
+				'drip4': {
+					'0%': { height: '0', opacity: '0' },
+					'12%': { opacity: '1' },
+					'58%': { height: '130%', opacity: '0.85' },
+					'100%': { height: '130%', opacity: '0' }
+				},
+				'drip5': {
+					'0%': { height: '0', opacity: '0' },
+					'8%': { opacity: '1' },
+					'55%': { height: '110%', opacity: '0.75' },
+					'100%': { height: '110%', opacity: '0' }
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out',
 				'glitch': 'glitch 2s infinite',
-				'flicker': 'flicker 3s infinite'
+				'flicker': 'flicker 3s infinite',
+				'drip3': 'drip3 5.5s ease-in infinite',
+				'drip4': 'drip4 6.5s ease-in infinite',
+				'drip5': 'drip5 5s ease-in infinite'
 			}
 		}
 	},

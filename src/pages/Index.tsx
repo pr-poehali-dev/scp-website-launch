@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import Icon from '@/components/ui/icon';
 import { Badge } from '@/components/ui/badge';
+import BloodDrops from '@/components/BloodDrops';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState<'home' | 'admins'>('home');
@@ -20,12 +21,13 @@ const Index = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
-                <div className="blood-drip">
+                <div className="blood-drip relative">
                   <img 
                     src="https://cdn.poehali.dev/projects/8c395228-8ba9-4eb4-8f5a-3c8614bf9c9e/files/5f933d73-0f84-4534-8cd9-1796950d33c9.jpg" 
                     alt="SCP Logo" 
-                    className="w-16 h-16 object-cover"
+                    className="w-16 h-16 object-cover relative z-10"
                   />
+                  <BloodDrops />
                 </div>
                 <div>
                   <h1 className="text-xl font-bold tracking-wider glitch">
