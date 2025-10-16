@@ -9,6 +9,10 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground relative scanline">
+      <div 
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-20" 
+        style={{ backgroundImage: 'url(https://cdn.poehali.dev/projects/8c395228-8ba9-4eb4-8f5a-3c8614bf9c9e/files/6f30ca28-62d2-466a-8fd7-25e42e5800af.jpg)' }}
+      />
       <div className="static-noise absolute inset-0 pointer-events-none" />
       
       <nav className="border-b border-destructive/50 bg-card/95 backdrop-blur sticky top-0 z-50">
@@ -111,37 +115,57 @@ const Index = () => {
                     </CardContent>
                   </Card>
 
-                  <Card className="border-border bg-secondary/50">
-                    <CardContent className="p-6">
-                      <div className="flex items-start gap-4">
-                        <div className="w-12 h-12 bg-destructive/20 flex items-center justify-center shrink-0">
-                          <Icon name="AlertTriangle" size={24} className="text-destructive" />
+                  <a 
+                    href="https://scpfoundation.net/lockdown-procedures?ysclid=mgthto24dr130428703" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="block"
+                  >
+                    <Card className="border-border bg-secondary/50 hover:bg-secondary/70 transition-all cursor-pointer hover:border-destructive/50">
+                      <CardContent className="p-6">
+                        <div className="flex items-start gap-4">
+                          <div className="w-12 h-12 bg-destructive/20 flex items-center justify-center shrink-0">
+                            <Icon name="AlertTriangle" size={24} className="text-destructive" />
+                          </div>
+                          <div>
+                            <h4 className="font-bold uppercase mb-2 flex items-center gap-2">
+                              Протоколы
+                              <Icon name="ExternalLink" size={14} className="text-destructive" />
+                            </h4>
+                            <p className="text-sm text-muted-foreground">
+                              Процедуры содержания
+                            </p>
+                          </div>
                         </div>
-                        <div>
-                          <h4 className="font-bold uppercase mb-2">Протоколы</h4>
-                          <p className="text-sm text-muted-foreground">
-                            Процедуры содержания
-                          </p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
+                      </CardContent>
+                    </Card>
+                  </a>
 
-                  <Card className="border-border bg-secondary/50">
-                    <CardContent className="p-6">
-                      <div className="flex items-start gap-4">
-                        <div className="w-12 h-12 bg-destructive/20 flex items-center justify-center shrink-0">
-                          <Icon name="Radio" size={24} className="text-destructive" />
+                  <a 
+                    href="https://t.me/+EKpJvUxFHgRhYzZi" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="block"
+                  >
+                    <Card className="border-border bg-secondary/50 hover:bg-secondary/70 transition-all cursor-pointer hover:border-destructive/50">
+                      <CardContent className="p-6">
+                        <div className="flex items-start gap-4">
+                          <div className="w-12 h-12 bg-destructive/20 flex items-center justify-center shrink-0">
+                            <Icon name="Send" size={24} className="text-destructive" />
+                          </div>
+                          <div>
+                            <h4 className="font-bold uppercase mb-2 flex items-center gap-2">
+                              Telegram
+                              <Icon name="ExternalLink" size={14} className="text-destructive" />
+                            </h4>
+                            <p className="text-sm text-muted-foreground">
+                              Канал фонда
+                            </p>
+                          </div>
                         </div>
-                        <div>
-                          <h4 className="font-bold uppercase mb-2">Связь</h4>
-                          <p className="text-sm text-muted-foreground">
-                            Связь с объектами
-                          </p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
+                      </CardContent>
+                    </Card>
+                  </a>
                 </div>
 
                 <div className="bg-destructive/10 border border-destructive p-4 mt-6">
