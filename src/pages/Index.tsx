@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import Icon from '@/components/ui/icon';
@@ -7,6 +7,46 @@ import BloodDrops from '@/components/BloodDrops';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState<'home' | 'admins'>('home');
+  const [vipActive, setVipActive] = useState(false);
+  const [vipUsed, setVipUsed] = useState(false);
+
+  useEffect(() => {
+    const vipExpiry = localStorage.getItem('vipExpiry');
+    const vipActivated = localStorage.getItem('vipActivated');
+    
+    if (vipActivated === 'true') {
+      setVipUsed(true);
+    }
+    
+    if (vipExpiry) {
+      const expiryTime = parseInt(vipExpiry);
+      const now = Date.now();
+      
+      if (now < expiryTime) {
+        setVipActive(true);
+        const timeout = setTimeout(() => {
+          setVipActive(false);
+          localStorage.removeItem('vipExpiry');
+        }, expiryTime - now);
+        
+        return () => clearTimeout(timeout);
+      } else {
+        localStorage.removeItem('vipExpiry');
+      }
+    }
+  }, []);
+
+  const activateVip = () => {
+    if (vipUsed) return;
+    
+    const twoDays = 2 * 24 * 60 * 60 * 1000;
+    const expiryTime = Date.now() + twoDays;
+    
+    localStorage.setItem('vipExpiry', expiryTime.toString());
+    localStorage.setItem('vipActivated', 'true');
+    setVipActive(true);
+    setVipUsed(true);
+  };
 
   return (
     <div className="min-h-screen bg-background text-foreground relative scanline">
@@ -32,9 +72,16 @@ const Index = () => {
                   </div>
                 </div>
                 <div>
-                  <h1 className="text-xl font-bold tracking-wider glitch">
-                    SCP HiTOs
-                  </h1>
+                  <div className="flex items-center gap-2">
+                    <h1 className="text-xl font-bold tracking-wider glitch">
+                      SCP HiTOs
+                    </h1>
+                    {vipActive && (
+                      <span className="text-sm font-bold uppercase animate-rainbow px-2 py-0.5 border border-purple-500 rounded">
+                        VIP
+                      </span>
+                    )}
+                  </div>
                   <p className="text-xs text-muted-foreground uppercase tracking-widest">
                     Secure. Contain. Protect.
                   </p>
@@ -193,7 +240,11 @@ const Index = () => {
 
             <div className="border-t border-destructive/30 pt-6 text-center">
               <p className="text-xs text-muted-foreground uppercase tracking-widest">
-                Foundation Internal Network • Level <span className="redacted">█</span> Clearance Required
+                Foundation <span 
+                  onClick={activateVip} 
+                  className="cursor-default hover:text-muted-foreground"
+                  style={{ userSelect: 'none' }}
+                >Internal</span> Network • Level <span className="redacted">█</span> Clearance Required
               </p>
             </div>
           </div>
