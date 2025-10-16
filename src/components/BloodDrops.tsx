@@ -19,9 +19,9 @@ const BloodDrops = () => {
           } as React.CSSProperties & { '--start-x': string }}
         />
       ))}
-      <div className="logo-fill absolute inset-0 bg-gradient-to-b from-red-900 to-red-600 opacity-0 pointer-events-none" />
-      <div className="logo-overflow absolute inset-x-0 top-full h-32 opacity-0 pointer-events-none">
-        <div className="w-full h-full bg-gradient-to-b from-red-600 via-red-800 to-transparent blur-sm" />
+      <div className="logo-fill absolute inset-0 bg-gradient-to-b from-red-900/70 to-red-600/70 opacity-0 mix-blend-multiply" />
+      <div className="logo-overflow absolute inset-x-0 top-full h-24 opacity-0">
+        <div className="w-full h-full bg-gradient-to-b from-red-600 via-red-800 to-transparent" />
       </div>
     </>
   );

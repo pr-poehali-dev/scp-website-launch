@@ -21,13 +21,15 @@ const Index = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
-                <div className="blood-drip relative">
+                <div className="blood-drip relative w-16 h-16 overflow-hidden">
                   <img 
                     src="https://cdn.poehali.dev/projects/8c395228-8ba9-4eb4-8f5a-3c8614bf9c9e/files/5f933d73-0f84-4534-8cd9-1796950d33c9.jpg" 
                     alt="SCP Logo" 
-                    className="w-16 h-16 object-cover relative z-10"
+                    className="w-full h-full object-cover relative z-10"
                   />
-                  <BloodDrops />
+                  <div className="absolute inset-0 z-20 pointer-events-none">
+                    <BloodDrops />
+                  </div>
                 </div>
                 <div>
                   <h1 className="text-xl font-bold tracking-wider glitch">
