@@ -83,7 +83,7 @@ const Index = () => {
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-2">
-                  <Card className="border-border bg-secondary/50">
+                  <Card className="border-border bg-secondary/20">
                     <CardContent className="p-6">
                       <div className="flex items-start gap-4">
                         <div className="w-12 h-12 bg-destructive/20 flex items-center justify-center shrink-0">
@@ -99,7 +99,7 @@ const Index = () => {
                     </CardContent>
                   </Card>
 
-                  <Card className="border-border bg-secondary/50">
+                  <Card className="border-border bg-secondary/20">
                     <CardContent className="p-6">
                       <div className="flex items-start gap-4">
                         <div className="w-12 h-12 bg-destructive/20 flex items-center justify-center shrink-0">
@@ -121,7 +121,7 @@ const Index = () => {
                     rel="noopener noreferrer"
                     className="block"
                   >
-                    <Card className="border-border bg-secondary/50 hover:bg-secondary/70 transition-all cursor-pointer hover:border-destructive/50">
+                    <Card className="border-border bg-secondary/20 hover:bg-secondary/40 transition-all cursor-pointer hover:border-destructive/50">
                       <CardContent className="p-6">
                         <div className="flex items-start gap-4">
                           <div className="w-12 h-12 bg-destructive/20 flex items-center justify-center shrink-0">
@@ -147,7 +147,7 @@ const Index = () => {
                     rel="noopener noreferrer"
                     className="block"
                   >
-                    <Card className="border-border bg-secondary/50 hover:bg-secondary/70 transition-all cursor-pointer hover:border-destructive/50">
+                    <Card className="border-border bg-secondary/20 hover:bg-secondary/40 transition-all cursor-pointer hover:border-destructive/50">
                       <CardContent className="p-6">
                         <div className="flex items-start gap-4">
                           <div className="w-12 h-12 bg-destructive/20 flex items-center justify-center shrink-0">
@@ -193,7 +193,7 @@ const Index = () => {
 
         {activeTab === 'admins' && (
           <div className="space-y-8 animate-fade-in">
-            <Card className="border-destructive/30 bg-card/80 backdrop-blur">
+            <Card className="border-destructive/30 bg-card/30 backdrop-blur">
               <CardHeader>
                 <div className="flex items-center gap-4">
                   <Badge variant="destructive" className="uppercase text-xs px-3 py-1">
@@ -206,7 +206,7 @@ const Index = () => {
               </CardHeader>
               <CardContent>
                 <div className="max-w-2xl mx-auto">
-                  <Card className="border-destructive/50 bg-secondary/30 hover:bg-secondary/50 transition-colors">
+                  <Card className="border-destructive/50 bg-secondary/20 hover:bg-secondary/40 transition-colors">
                     <CardContent className="p-6">
                       <div className="flex items-start gap-6">
                         <div className="w-20 h-20 bg-destructive/20 border-2 border-destructive flex items-center justify-center shrink-0">
