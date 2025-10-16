@@ -4,13 +4,33 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import Icon from '@/components/ui/icon';
 import { Badge } from '@/components/ui/badge';
 import BloodDrops from '@/components/BloodDrops';
+import { Input } from '@/components/ui/input';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import AuthScreen from '@/components/AuthScreen';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState<'home' | 'admins'>('home');
   const [vipActive, setVipActive] = useState(false);
   const [vipUsed, setVipUsed] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [showAuth, setShowAuth] = useState(true);
+  const [username, setUsername] = useState('');
+  const [showAdminPanel, setShowAdminPanel] = useState(false);
+  const [adminPassword, setAdminPassword] = useState('');
+  const [adminUnlocked, setAdminUnlocked] = useState(false);
+  const [users, setUsers] = useState<Array<{username: string, vip: boolean, loginTime: number, sessionDuration: number}>>([]);
 
   useEffect(() => {
+    const storedUsername = localStorage.getItem('username');
+    const loginTime = localStorage.getItem('loginTime');
+    
+    if (storedUsername && loginTime) {
+      setIsAuthenticated(true);
+      setUsername(storedUsername);
+      setShowAuth(false);
+      updateUserSession(storedUsername);
+    }
+
     const vipExpiry = localStorage.getItem('vipExpiry');
     const vipActivated = localStorage.getItem('vipActivated');
     
@@ -34,7 +54,73 @@ const Index = () => {
         localStorage.removeItem('vipExpiry');
       }
     }
+
+    loadUsers();
   }, []);
+
+  const loadUsers = () => {
+    const storedUsers = localStorage.getItem('siteUsers');
+    if (storedUsers) {
+      setUsers(JSON.parse(storedUsers));
+    }
+  };
+
+  const updateUserSession = (user: string) => {
+    const storedUsers = localStorage.getItem('siteUsers');
+    const usersList = storedUsers ? JSON.parse(storedUsers) : [];
+    const loginTime = parseInt(localStorage.getItem('loginTime') || Date.now().toString());
+    const vipExpiry = localStorage.getItem('vipExpiry');
+    const hasVip = vipExpiry ? Date.now() < parseInt(vipExpiry) : false;
+    
+    const existingUserIndex = usersList.findIndex((u: any) => u.username === user);
+    
+    if (existingUserIndex >= 0) {
+      usersList[existingUserIndex].sessionDuration = Date.now() - loginTime;
+      usersList[existingUserIndex].vip = hasVip;
+    } else {
+      usersList.push({
+        username: user,
+        vip: hasVip,
+        loginTime: loginTime,
+        sessionDuration: 0
+      });
+    }
+    
+    localStorage.setItem('siteUsers', JSON.stringify(usersList));
+    setUsers(usersList);
+  };
+
+  const handleRegister = () => {
+    if (username.trim().length < 3) {
+      alert('Ник должен быть минимум 3 символа');
+      return;
+    }
+    
+    localStorage.setItem('username', username);
+    localStorage.setItem('loginTime', Date.now().toString());
+    setIsAuthenticated(true);
+    setShowAuth(false);
+    updateUserSession(username);
+  };
+
+  const handleAdminUnlock = () => {
+    if (adminPassword === 'denis222p') {
+      setAdminUnlocked(true);
+      loadUsers();
+    } else {
+      alert('Неверный пароль!');
+    }
+  };
+
+  const formatDuration = (ms: number) => {
+    const seconds = Math.floor(ms / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(minutes / 60);
+    
+    if (hours > 0) return `${hours}ч ${minutes % 60}м`;
+    if (minutes > 0) return `${minutes}м ${seconds % 60}с`;
+    return `${seconds}с`;
+  };
 
   const activateVip = () => {
     if (vipUsed) return;
@@ -46,7 +132,12 @@ const Index = () => {
     localStorage.setItem('vipActivated', 'true');
     setVipActive(true);
     setVipUsed(true);
+    updateUserSession(username);
   };
+
+  if (!isAuthenticated) {
+    return <AuthScreen onRegister={handleRegister} />;
+  }
 
   return (
     <div className="min-h-screen bg-background text-foreground relative scanline">
@@ -373,10 +464,20 @@ const Index = () => {
               </CardContent>
             </Card>
 
-            <div className="border-t border-destructive/30 pt-6 text-center">
-              <p className="text-xs text-muted-foreground uppercase tracking-widest">
-                Administrator Registry • O5 Council Approved
-              </p>
+            <div className="border-t border-destructive/30 pt-6">
+              <div className="flex justify-between items-center">
+                <p className="text-xs text-muted-foreground uppercase tracking-widest">
+                  Administrator Registry • O5 Council Approved
+                </p>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowAdminPanel(true)}
+                  className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                >
+                  <Icon name="Lock" size={16} />
+                </Button>
+              </div>
             </div>
           </div>
         )}
@@ -392,6 +493,83 @@ const Index = () => {
           </p>
         </div>
       </footer>
+
+      <Dialog open={showAdminPanel} onOpenChange={setShowAdminPanel}>
+        <DialogContent className="border-destructive/30 bg-card/95 backdrop-blur">
+          <DialogHeader>
+            <DialogTitle className="uppercase tracking-wider flex items-center gap-2">
+              <Icon name="Shield" size={20} className="text-destructive" />
+              Панель основателя
+            </DialogTitle>
+          </DialogHeader>
+          
+          {!adminUnlocked ? (
+            <div className="space-y-4">
+              <div className="border-l-4 border-destructive pl-4 py-2">
+                <p className="text-sm text-muted-foreground">
+                  Требуется пароль для доступа к панели управления.
+                </p>
+              </div>
+              <Input
+                type="password"
+                placeholder="Введите пароль..."
+                value={adminPassword}
+                onChange={(e) => setAdminPassword(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleAdminUnlock()}
+                className="bg-secondary/50 border-destructive/30"
+              />
+              <Button 
+                onClick={handleAdminUnlock}
+                className="w-full"
+                variant="destructive"
+              >
+                <Icon name="Unlock" size={16} className="mr-2" />
+                Разблокировать
+              </Button>
+            </div>
+          ) : (
+            <div className="space-y-4 max-h-96 overflow-y-auto">
+              <div className="border-l-4 border-purple-500 pl-4 py-2 bg-purple-900/20">
+                <h3 className="font-bold uppercase text-sm mb-1 text-purple-400">Статистика пользователей</h3>
+                <p className="text-xs text-muted-foreground">
+                  Всего зарегистрировано: {users.length}
+                </p>
+              </div>
+
+              <div className="space-y-3">
+                {users.map((user, index) => (
+                  <Card key={index} className="border-border bg-secondary/30">
+                    <CardContent className="p-4">
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex items-start gap-3 flex-1">
+                          <div className="w-10 h-10 bg-destructive/20 flex items-center justify-center shrink-0 rounded">
+                            <Icon name="User" size={20} className="text-destructive" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-bold text-sm truncate">{user.username}</h4>
+                            <div className="flex flex-wrap gap-2 mt-2">
+                              <Badge 
+                                variant={user.vip ? "default" : "outline"}
+                                className={user.vip ? "bg-purple-500" : ""}
+                              >
+                                {user.vip ? "VIP" : "Обычный"}
+                              </Badge>
+                              <Badge variant="outline" className="text-xs">
+                                <Icon name="Clock" size={12} className="mr-1" />
+                                {formatDuration(user.sessionDuration)}
+                              </Badge>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
