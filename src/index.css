@@ -6,23 +6,23 @@
 
 @layer base {
   :root {
-    --background: 217 16% 8%;
-    --foreground: 0 0% 95%;
+    --background: 0 0% 3%;
+    --foreground: 0 0% 90%;
 
-    --card: 217 17% 11%;
-    --card-foreground: 0 0% 95%;
+    --card: 0 0% 6%;
+    --card-foreground: 0 0% 90%;
 
-    --popover: 217 17% 11%;
-    --popover-foreground: 0 0% 95%;
+    --popover: 0 0% 6%;
+    --popover-foreground: 0 0% 90%;
 
     --primary: 0 100% 27%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 0 0% 18%;
-    --secondary-foreground: 0 0% 95%;
+    --secondary: 0 0% 10%;
+    --secondary-foreground: 0 0% 90%;
 
-    --muted: 217 16% 15%;
-    --muted-foreground: 0 0% 60%;
+    --muted: 0 0% 12%;
+    --muted-foreground: 0 0% 50%;
 
     --accent: 0 100% 50%;
     --accent-foreground: 0 0% 100%;
@@ -30,8 +30,8 @@
     --destructive: 0 100% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 27%;
-    --input: 0 0% 27%;
+    --border: 0 0% 20%;
+    --input: 0 0% 20%;
     --ring: 0 100% 27%;
 
     --radius: 0rem;
@@ -137,65 +137,90 @@
   .blood-drip {
     position: relative;
     overflow: visible;
+    transition: all 0.3s ease;
   }
 
-  .blood-drip::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 30%;
-    width: 2px;
-    height: 0;
-    background: linear-gradient(to bottom, #8b0000, transparent);
-    animation: drip1 5s ease-in infinite;
-    transform: translateX(-50%);
+  .blood-drip:hover .logo-fill {
+    animation: fillBlood 2s ease-in forwards;
   }
 
-  .blood-drip::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 70%;
-    width: 2px;
-    height: 0;
-    background: linear-gradient(to bottom, #8b0000, transparent);
-    animation: drip2 6s ease-in infinite 1s;
-    transform: translateX(-50%);
+  .blood-drip:hover .logo-overflow {
+    animation: overflowBlood 1s ease-out 2s forwards;
   }
 
-  @keyframes drip1 {
+  @keyframes fillBlood {
     0% {
-      height: 0;
+      clip-path: inset(100% 0 0 0);
       opacity: 0;
     }
-    10% {
-      opacity: 1;
-    }
-    60% {
-      height: 120%;
-      opacity: 0.8;
+    50% {
+      opacity: 0.9;
     }
     100% {
-      height: 120%;
-      opacity: 0;
-    }
-  }
-
-  @keyframes drip2 {
-    0% {
-      height: 0;
-      opacity: 0;
-    }
-    15% {
-      opacity: 1;
-    }
-    65% {
-      height: 100%;
+      clip-path: inset(0 0 0 0);
       opacity: 0.7;
     }
-    100% {
-      height: 100%;
+  }
+
+  @keyframes overflowBlood {
+    0% {
       opacity: 0;
+      transform: translateY(0);
+    }
+    50% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+      transform: translateY(100%);
+    }
+  }
+
+  .blood-drop {
+    position: absolute;
+    width: 3px;
+    border-radius: 0 0 50% 50%;
+    background: linear-gradient(to bottom, #8b0000, #ff0000);
+    opacity: 0;
+    animation: randomDrip 8s ease-in infinite;
+  }
+
+  @keyframes randomDrip {
+    0% {
+      top: 0;
+      height: 5px;
+      opacity: 0;
+    }
+    5% {
+      opacity: 0.9;
+    }
+    15% {
+      top: 20%;
+      left: calc(var(--start-x) + 2px);
+    }
+    30% {
+      top: 40%;
+      left: calc(var(--start-x) - 3px);
+    }
+    50% {
+      top: 65%;
+      left: calc(var(--start-x) + 1px);
+      height: 15px;
+    }
+    70% {
+      top: 85%;
+      left: calc(var(--start-x) - 2px);
+      height: 20px;
+    }
+    85% {
+      top: 100%;
+      opacity: 0.8;
+      height: 25px;
+    }
+    100% {
+      top: 150%;
+      opacity: 0;
+      height: 30px;
     }
   }
 }

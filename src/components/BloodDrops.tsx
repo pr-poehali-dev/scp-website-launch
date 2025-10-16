@@ -1,27 +1,28 @@
 const BloodDrops = () => {
+  const drops = Array.from({ length: 12 }, (_, i) => ({
+    left: Math.random() * 100,
+    delay: Math.random() * 8,
+    duration: 6 + Math.random() * 4
+  }));
+
   return (
     <>
-      <div 
-        className="absolute top-0 left-1/2 w-0.5 h-0 animate-drip3"
-        style={{
-          background: 'linear-gradient(to bottom, #8B0000, transparent)',
-          animationDelay: '2s'
-        }}
-      />
-      <div 
-        className="absolute top-0 left-[40%] w-0.5 h-0 animate-drip4"
-        style={{
-          background: 'linear-gradient(to bottom, #8B0000, transparent)',
-          animationDelay: '3.5s'
-        }}
-      />
-      <div 
-        className="absolute top-0 left-[60%] w-0.5 h-0 animate-drip5"
-        style={{
-          background: 'linear-gradient(to bottom, #8B0000, transparent)',
-          animationDelay: '1.5s'
-        }}
-      />
+      {drops.map((drop, index) => (
+        <div
+          key={index}
+          className="blood-drop"
+          style={{
+            left: `${drop.left}%`,
+            animationDelay: `${drop.delay}s`,
+            animationDuration: `${drop.duration}s`,
+            '--start-x': `${drop.left}%`
+          } as React.CSSProperties & { '--start-x': string }}
+        />
+      ))}
+      <div className="logo-fill absolute inset-0 bg-gradient-to-b from-red-900 to-red-600 opacity-0 pointer-events-none" />
+      <div className="logo-overflow absolute inset-x-0 top-full h-32 opacity-0 pointer-events-none">
+        <div className="w-full h-full bg-gradient-to-b from-red-600 via-red-800 to-transparent blur-sm" />
+      </div>
     </>
   );
 };
