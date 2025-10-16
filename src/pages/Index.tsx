@@ -121,7 +121,11 @@ const Index = () => {
                       Classified
                     </Badge>
                     <h2 className="text-2xl font-bold uppercase tracking-wider">
-                      Уровень допуска: <span className="redacted">████████</span>
+                      Уровень допуска: {vipActive ? (
+                        <span className="text-purple-500 animate-pulse">O5-COUNCIL</span>
+                      ) : (
+                        <span className="redacted">████████</span>
+                      )}
                     </h2>
                   </div>
                   <Icon name="Lock" size={24} className="text-destructive animate-flicker" />
@@ -131,9 +135,18 @@ const Index = () => {
                 <div className="border-l-4 border-destructive pl-4 py-2">
                   <h3 className="text-xl font-bold mb-2 uppercase">Внимание</h3>
                   <p className="text-muted-foreground leading-relaxed">
-                    Доступ к данной информации ограничен персоналом с уровнем допуска 
-                    <span className="redacted mx-1">███</span> и выше. Несанкционированный доступ 
-                    карается согласно протоколу <span className="redacted">████-█</span>.
+                    {vipActive ? (
+                      <>
+                        <span className="text-green-500">✓ Полный доступ предоставлен.</span> Вы обладаете уровнем допуска O5-Council. 
+                        Все материалы и протоколы Фонда доступны без ограничений. Срок действия статуса истекает через 2 дня.
+                      </>
+                    ) : (
+                      <>
+                        Доступ к данной информации ограничен персоналом с уровнем допуска 
+                        <span className="redacted mx-1">███</span> и выше. Несанкционированный доступ 
+                        карается согласно протоколу <span className="redacted">████-█</span>.
+                      </>
+                    )}
                   </p>
                 </div>
 
@@ -147,7 +160,11 @@ const Index = () => {
                         <div>
                           <h4 className="font-bold uppercase mb-2">Документы</h4>
                           <p className="text-sm text-muted-foreground">
-                            Доступ к <span className="redacted">███</span> засекреченным файлам
+                            {vipActive ? (
+                              <span className="text-green-400">Доступ к 1,847 засекреченным файлам</span>
+                            ) : (
+                              <>Доступ к <span className="redacted">███</span> засекреченным файлам</>
+                            )}
                           </p>
                         </div>
                       </div>
@@ -223,18 +240,37 @@ const Index = () => {
                   </a>
                 </div>
 
-                <div className="bg-destructive/10 border border-destructive p-4 mt-6">
-                  <div className="flex items-start gap-3">
-                    <Icon name="AlertCircle" size={20} className="text-destructive shrink-0 mt-1" />
-                    <div>
-                      <h4 className="font-bold uppercase text-sm mb-1">Предупреждение системы</h4>
-                      <p className="text-xs text-muted-foreground">
-                        Обнаружена попытка несанкционированного доступа к файлу 
-                        <span className="redacted mx-1">████-███</span>. Система безопасности активирована.
-                      </p>
+                {vipActive && (
+                  <div className="bg-purple-900/20 border border-purple-500 p-4 mt-6 animate-pulse">
+                    <div className="flex items-start gap-3">
+                      <Icon name="Crown" size={20} className="text-purple-500 shrink-0 mt-1" />
+                      <div>
+                        <h4 className="font-bold uppercase text-sm mb-1 text-purple-400">VIP ПРИВИЛЕГИИ АКТИВНЫ</h4>
+                        <p className="text-xs text-purple-300">
+                          • Полный доступ ко всем секретным файлам<br/>
+                          • Уровень допуска O5-Council<br/>
+                          • Расшифрованные документы<br/>
+                          • Специальный статус в системе
+                        </p>
+                      </div>
                     </div>
                   </div>
-                </div>
+                )}
+
+                {!vipActive && (
+                  <div className="bg-destructive/10 border border-destructive p-4 mt-6">
+                    <div className="flex items-start gap-3">
+                      <Icon name="AlertCircle" size={20} className="text-destructive shrink-0 mt-1" />
+                      <div>
+                        <h4 className="font-bold uppercase text-sm mb-1">Предупреждение системы</h4>
+                        <p className="text-xs text-muted-foreground">
+                          Обнаружена попытка несанкционированного доступа к файлу 
+                          <span className="redacted mx-1">████-███</span>. Система безопасности активирована.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
 
