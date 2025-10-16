@@ -20,11 +20,13 @@ const Index = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
-                <img 
-                  src="https://cdn.poehali.dev/projects/8c395228-8ba9-4eb4-8f5a-3c8614bf9c9e/files/5f933d73-0f84-4534-8cd9-1796950d33c9.jpg" 
-                  alt="SCP Logo" 
-                  className="w-16 h-16 object-cover"
-                />
+                <div className="blood-drip">
+                  <img 
+                    src="https://cdn.poehali.dev/projects/8c395228-8ba9-4eb4-8f5a-3c8614bf9c9e/files/5f933d73-0f84-4534-8cd9-1796950d33c9.jpg" 
+                    alt="SCP Logo" 
+                    className="w-16 h-16 object-cover"
+                  />
+                </div>
                 <div>
                   <h1 className="text-xl font-bold tracking-wider glitch">
                     SCP HiTOs
