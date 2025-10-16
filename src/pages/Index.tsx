@@ -25,7 +25,7 @@ const Index = () => {
                 </div>
                 <div>
                   <h1 className="text-xl font-bold tracking-wider glitch">
-                    SCP FOUNDATION
+                    SCP HiTOs
                   </h1>
                   <p className="text-xs text-muted-foreground uppercase tracking-widest">
                     Secure. Contain. Protect.
