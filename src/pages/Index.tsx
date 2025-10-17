@@ -19,6 +19,9 @@ const Index = () => {
   const [adminPassword, setAdminPassword] = useState('');
   const [adminUnlocked, setAdminUnlocked] = useState(false);
   const [users, setUsers] = useState<Array<{username: string, vip: boolean, loginTime: number, sessionDuration: number}>>([]);
+  const [showAccountMenu, setShowAccountMenu] = useState(false);
+  const [newUsername, setNewUsername] = useState('');
+  const [showChangeUsername, setShowChangeUsername] = useState(false);
 
   useEffect(() => {
     const storedUsername = localStorage.getItem('username');
@@ -107,6 +110,53 @@ const Index = () => {
     }
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem('username');
+    localStorage.removeItem('loginTime');
+    localStorage.removeItem('vipExpiry');
+    localStorage.removeItem('vipActivated');
+    setIsAuthenticated(false);
+    setUsername('');
+    setVipActive(false);
+    setVipUsed(false);
+    setShowAccountMenu(false);
+  };
+
+  const handleChangeUsername = () => {
+    if (newUsername.trim().length < 3) {
+      alert('Ник должен быть минимум 3 символа');
+      return;
+    }
+    
+    const oldUsername = username;
+    localStorage.setItem('username', newUsername);
+    setUsername(newUsername);
+    
+    const storedUsers = localStorage.getItem('siteUsers');
+    const usersList = storedUsers ? JSON.parse(storedUsers) : [];
+    const userIndex = usersList.findIndex((u: any) => u.username === oldUsername);
+    
+    if (userIndex >= 0) {
+      usersList[userIndex].username = newUsername;
+      localStorage.setItem('siteUsers', JSON.stringify(usersList));
+      setUsers(usersList);
+    }
+    
+    setShowChangeUsername(false);
+    setNewUsername('');
+    setShowAccountMenu(false);
+  };
+
+  const getUserLevel = () => {
+    const loginTime = parseInt(localStorage.getItem('loginTime') || Date.now().toString());
+    const sessionMinutes = Math.floor((Date.now() - loginTime) / 60000);
+    
+    if (sessionMinutes < 10) return { level: 1, name: 'Новобранец', color: 'text-gray-400' };
+    if (sessionMinutes < 30) return { level: 2, name: 'Сотрудник', color: 'text-blue-400' };
+    if (sessionMinutes < 60) return { level: 3, name: 'Специалист', color: 'text-green-400' };
+    return { level: 4, name: 'Ветеран', color: 'text-purple-400' };
+  };
+
   const formatDuration = (ms: number) => {
     const seconds = Math.floor(ms / 1000);
     const minutes = Math.floor(seconds / 60);
@@ -174,7 +224,7 @@ const Index = () => {
                 </div>
               </div>
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-3 items-center">
               <Button
                 variant={activeTab === 'home' ? 'default' : 'outline'}
                 onClick={() => setActiveTab('home')}
@@ -183,6 +233,62 @@ const Index = () => {
                 <Icon name="Home" size={16} className="mr-2" />
                 Главная
               </Button>
+              
+              <div className="relative">
+                <button
+                  onClick={() => setShowAccountMenu(!showAccountMenu)}
+                  className="w-10 h-10 rounded-full bg-gradient-to-br from-destructive to-destructive/60 border-2 border-destructive flex items-center justify-center hover:scale-105 transition-transform"
+                >
+                  <Icon name="User" size={20} className="text-primary-foreground" />
+                </button>
+                
+                {showAccountMenu && (
+                  <div className="absolute right-0 mt-2 w-64 bg-card border border-destructive/30 rounded-lg shadow-lg z-50">
+                    <div className="p-4 border-b border-destructive/30">
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-destructive to-destructive/60 border-2 border-destructive flex items-center justify-center">
+                          <Icon name="User" size={24} className="text-primary-foreground" />
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="font-bold truncate">{username}</h3>
+                          <p className={`text-xs uppercase ${getUserLevel().color}`}>
+                            {getUserLevel().name} • LVL {getUserLevel().level}
+                          </p>
+                        </div>
+                      </div>
+                      {vipActive && (
+                        <Badge className="mt-2 w-full justify-center bg-purple-500">
+                          <Icon name="Crown" size={12} className="mr-1" />
+                          VIP Активен
+                        </Badge>
+                      )}
+                    </div>
+                    
+                    <div className="p-2">
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start"
+                        onClick={() => {
+                          setShowChangeUsername(true);
+                          setShowAccountMenu(false);
+                        }}
+                      >
+                        <Icon name="Edit" size={16} className="mr-2" />
+                        Сменить ник
+                      </Button>
+                      
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10"
+                        onClick={handleLogout}
+                      >
+                        <Icon name="LogOut" size={16} className="mr-2" />
+                        Выход
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </div>
               <Button
                 variant={activeTab === 'admins' ? 'default' : 'outline'}
                 onClick={() => setActiveTab('admins')}
@@ -563,6 +669,46 @@ const Index = () => {
               </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showChangeUsername} onOpenChange={setShowChangeUsername}>
+        <DialogContent className="border-destructive/30 bg-card/95 backdrop-blur">
+          <DialogHeader>
+            <DialogTitle className="uppercase tracking-wider flex items-center gap-2">
+              <Icon name="Edit" size={20} className="text-destructive" />
+              Смена ника
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div className="border-l-4 border-destructive pl-4 py-2">
+              <p className="text-sm text-muted-foreground">
+                Текущий ник: <span className="font-bold text-foreground">{username}</span>
+              </p>
+            </div>
+            
+            <div>
+              <label className="text-xs uppercase text-muted-foreground mb-2 block">Новый ник</label>
+              <Input
+                type="text"
+                placeholder="Введите новый ник..."
+                value={newUsername}
+                onChange={(e) => setNewUsername(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleChangeUsername()}
+                className="bg-secondary/50 border-destructive/30"
+              />
+            </div>
+            
+            <Button 
+              onClick={handleChangeUsername}
+              className="w-full"
+              variant="destructive"
+            >
+              <Icon name="Check" size={16} className="mr-2" />
+              Подтвердить
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
