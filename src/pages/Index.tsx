@@ -71,13 +71,26 @@ const Index = () => {
     }
 
     loadUsers();
+    
+    // Обновляем сессии пользователей каждые 30 секунд
+    const sessionInterval = setInterval(() => {
+      if (storedUsername) {
+        updateUserSession(storedUsername);
+      }
+    }, 30000);
+    
+    return () => clearInterval(sessionInterval);
   }, []);
 
   const loadUsers = () => {
     const storedUsers = localStorage.getItem('siteUsers');
     if (storedUsers) {
       const parsed = JSON.parse(storedUsers);
-      setUsers(parsed.filter((u: any) => !u.banned));
+      // Показываем всех пользователей, кроме забаненных
+      const activUsers = parsed.filter((u: any) => !u.banned);
+      setUsers(activUsers);
+    } else {
+      setUsers([]);
     }
   };
 
@@ -122,7 +135,8 @@ const Index = () => {
     }
     
     localStorage.setItem('siteUsers', JSON.stringify(usersList));
-    setUsers(usersList);
+    // Обновляем список пользователей (исключая забаненных)
+    setUsers(usersList.filter((u: any) => !u.banned));
   };
 
   const handleRegister = (newUsername: string, isMasterUser?: boolean) => {
@@ -144,14 +158,15 @@ const Index = () => {
   const handleAdminUnlock = () => {
     if (isMaster) {
       setAdminUnlocked(true);
-      loadUsers();
+      // Принудительно перезагружаем список пользователей
+      setTimeout(() => loadUsers(), 100);
       return;
     }
     
     const storedPassword = localStorage.getItem('adminPassword') || 'denis222p';
     if (adminPassword === storedPassword) {
       setAdminUnlocked(true);
-      loadUsers();
+      setTimeout(() => loadUsers(), 100);
     } else {
       alert('Неверный пароль!');
     }
@@ -760,7 +775,16 @@ const Index = () => {
         </div>
       </footer>
 
-      <Dialog open={showAdminPanel} onOpenChange={setShowAdminPanel}>
+      <Dialog 
+        open={showAdminPanel} 
+        onOpenChange={(open) => {
+          setShowAdminPanel(open);
+          if (open && isMaster) {
+            // Перезагружаем пользователей при открытии панели
+            loadUsers();
+          }
+        }}
+      >
         <DialogContent className="border-destructive/30 bg-card/95 backdrop-blur">
           <DialogHeader>
             <DialogTitle className="uppercase tracking-wider flex items-center gap-2">
