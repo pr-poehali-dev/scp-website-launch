@@ -22,6 +22,7 @@ const Index = () => {
   const [showAccountMenu, setShowAccountMenu] = useState(false);
   const [newUsername, setNewUsername] = useState('');
   const [showChangeUsername, setShowChangeUsername] = useState(false);
+  const [showMasterWelcome, setShowMasterWelcome] = useState(false);
 
   useEffect(() => {
     const storedUsername = localStorage.getItem('username');
@@ -93,12 +94,19 @@ const Index = () => {
     setUsers(usersList);
   };
 
-  const handleRegister = (newUsername: string) => {
+  const handleRegister = (newUsername: string, isMaster?: boolean) => {
     localStorage.setItem('username', newUsername);
     localStorage.setItem('loginTime', Date.now().toString());
     setIsAuthenticated(true);
     setUsername(newUsername);
     updateUserSession(newUsername);
+    
+    if (isMaster) {
+      setShowMasterWelcome(true);
+      setTimeout(() => {
+        setShowMasterWelcome(false);
+      }, 4000);
+    }
   };
 
   const handleAdminUnlock = () => {
@@ -186,6 +194,27 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground relative scanline">
+      {showMasterWelcome && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm animate-fade-in">
+          <div className="text-center space-y-4 animate-fade-in">
+            <div className="text-4xl font-bold uppercase tracking-wider text-blue-400 glitch">
+              Добро пожаловать,
+            </div>
+            <div className="text-3xl font-bold uppercase tracking-wider text-blue-300">
+              Мой Господин
+            </div>
+            <div className="text-xl text-blue-400/70 uppercase tracking-widest mt-6">
+              Всё в вашем распоряжении
+            </div>
+            <div className="flex justify-center gap-2 mt-8">
+              <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse" />
+              <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse" style={{animationDelay: '0.2s'}} />
+              <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse" style={{animationDelay: '0.4s'}} />
+            </div>
+          </div>
+        </div>
+      )}
+      
       <div 
         className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-20" 
         style={{ backgroundImage: 'url(https://cdn.poehali.dev/projects/8c395228-8ba9-4eb4-8f5a-3c8614bf9c9e/files/6f30ca28-62d2-466a-8fd7-25e42e5800af.jpg)' }}

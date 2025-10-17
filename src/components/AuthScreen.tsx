@@ -6,18 +6,33 @@ import { Input } from '@/components/ui/input';
 import BloodDrops from './BloodDrops';
 
 interface AuthScreenProps {
-  onRegister: (username: string) => void;
+  onRegister: (username: string, isMaster?: boolean) => void;
 }
 
 const AuthScreen = ({ onRegister }: AuthScreenProps) => {
   const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [requiresPassword, setRequiresPassword] = useState(false);
 
-  const handleRegister = () => {
+  const handleUsernameCheck = () => {
     if (username.trim().length < 3) {
       alert('Ник должен быть минимум 3 символа');
       return;
     }
-    onRegister(username);
+    
+    if (username.toLowerCase() === 'anal_genius') {
+      setRequiresPassword(true);
+    } else {
+      onRegister(username);
+    }
+  };
+
+  const handlePasswordSubmit = () => {
+    if (password === 'denis2010') {
+      onRegister(username, true);
+    } else {
+      alert('Неверный пароль!');
+    }
   };
 
   return (
@@ -51,26 +66,73 @@ const AuthScreen = ({ onRegister }: AuthScreenProps) => {
           </div>
           
           <div className="space-y-3">
-            <div>
-              <label className="text-xs uppercase text-muted-foreground mb-2 block">Введите ник</label>
-              <Input
-                type="text"
-                placeholder="Ваш ник..."
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleRegister()}
-                className="bg-secondary/50 border-destructive/30"
-              />
-            </div>
-            
-            <Button 
-              onClick={handleRegister}
-              className="w-full uppercase tracking-wider"
-              variant="destructive"
-            >
-              <Icon name="ShieldCheck" size={16} className="mr-2" />
-              Зарегистрироваться
-            </Button>
+            {!requiresPassword ? (
+              <>
+                <div>
+                  <label className="text-xs uppercase text-muted-foreground mb-2 block">Введите ник</label>
+                  <Input
+                    type="text"
+                    placeholder="Ваш ник..."
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleUsernameCheck()}
+                    className="bg-secondary/50 border-destructive/30"
+                  />
+                </div>
+                
+                <Button 
+                  onClick={handleUsernameCheck}
+                  className="w-full uppercase tracking-wider"
+                  variant="destructive"
+                >
+                  <Icon name="ShieldCheck" size={16} className="mr-2" />
+                  Зарегистрироваться
+                </Button>
+              </>
+            ) : (
+              <>
+                <div className="border-l-4 border-blue-500 pl-4 py-2 bg-blue-900/20">
+                  <h3 className="font-bold uppercase mb-1 text-sm text-blue-400">O5 Уровень доступа</h3>
+                  <p className="text-xs text-muted-foreground">
+                    Для входа в аккаунт <span className="font-bold text-foreground">{username}</span> требуется пароль.
+                  </p>
+                </div>
+                
+                <div>
+                  <label className="text-xs uppercase text-muted-foreground mb-2 block">Введите пароль</label>
+                  <Input
+                    type="password"
+                    placeholder="Пароль..."
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handlePasswordSubmit()}
+                    className="bg-secondary/50 border-blue-500/50"
+                    autoFocus
+                  />
+                </div>
+                
+                <div className="flex gap-2">
+                  <Button 
+                    onClick={() => {
+                      setRequiresPassword(false);
+                      setPassword('');
+                    }}
+                    className="flex-1 uppercase tracking-wider"
+                    variant="outline"
+                  >
+                    <Icon name="ArrowLeft" size={16} className="mr-2" />
+                    Назад
+                  </Button>
+                  <Button 
+                    onClick={handlePasswordSubmit}
+                    className="flex-1 uppercase tracking-wider bg-blue-600 hover:bg-blue-700"
+                  >
+                    <Icon name="Unlock" size={16} className="mr-2" />
+                    Войти
+                  </Button>
+                </div>
+              </>
+            )}
           </div>
 
           <div className="bg-destructive/10 border border-destructive p-3 mt-4">
