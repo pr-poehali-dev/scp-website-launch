@@ -18,11 +18,19 @@ const Index = () => {
   const [showAdminPanel, setShowAdminPanel] = useState(false);
   const [adminPassword, setAdminPassword] = useState('');
   const [adminUnlocked, setAdminUnlocked] = useState(false);
-  const [users, setUsers] = useState<Array<{username: string, vip: boolean, loginTime: number, sessionDuration: number}>>([]);
+  const [users, setUsers] = useState<Array<{username: string, vip: boolean, loginTime: number, sessionDuration: number, banned?: boolean, role?: string, roleLevel?: number}>>([]);
   const [showAccountMenu, setShowAccountMenu] = useState(false);
   const [newUsername, setNewUsername] = useState('');
   const [showChangeUsername, setShowChangeUsername] = useState(false);
   const [showMasterWelcome, setShowMasterWelcome] = useState(false);
+  const [isMaster, setIsMaster] = useState(false);
+  const [adminPanelTab, setAdminPanelTab] = useState<'users' | 'roles' | 'settings'>('users');
+  const [newAdminPassword, setNewAdminPassword] = useState('');
+  const [roleUsername, setRoleUsername] = useState('');
+  const [roleType, setRoleType] = useState<'moderator' | 'admin'>('moderator');
+  const [roleLevel, setRoleLevel] = useState(1);
+  const [banUsername, setBanUsername] = useState('');
+  const [permissions, setPermissions] = useState<{[key: string]: {ban: number, delete: number, kick: number}}>({});
 
   useEffect(() => {
     const storedUsername = localStorage.getItem('username');
@@ -32,8 +40,11 @@ const Index = () => {
       setIsAuthenticated(true);
       setUsername(storedUsername);
       setShowAuth(false);
+      setIsMaster(storedUsername.toLowerCase() === 'anal_genius');
       updateUserSession(storedUsername);
     }
+    
+    loadPermissions();
 
     const vipExpiry = localStorage.getItem('vipExpiry');
     const vipActivated = localStorage.getItem('vipActivated');
@@ -65,8 +76,28 @@ const Index = () => {
   const loadUsers = () => {
     const storedUsers = localStorage.getItem('siteUsers');
     if (storedUsers) {
-      setUsers(JSON.parse(storedUsers));
+      const parsed = JSON.parse(storedUsers);
+      setUsers(parsed.filter((u: any) => !u.banned));
     }
+  };
+
+  const loadPermissions = () => {
+    const storedPerms = localStorage.getItem('rolePermissions');
+    if (storedPerms) {
+      setPermissions(JSON.parse(storedPerms));
+    } else {
+      const defaultPerms = {
+        moderator: { ban: 2, delete: 1, kick: 1 },
+        admin: { ban: 5, delete: 3, kick: 1 }
+      };
+      setPermissions(defaultPerms);
+      localStorage.setItem('rolePermissions', JSON.stringify(defaultPerms));
+    }
+  };
+
+  const savePermissions = () => {
+    localStorage.setItem('rolePermissions', JSON.stringify(permissions));
+    alert('Настройки прав доступа сохранены!');
   };
 
   const updateUserSession = (user: string) => {
@@ -94,14 +125,15 @@ const Index = () => {
     setUsers(usersList);
   };
 
-  const handleRegister = (newUsername: string, isMaster?: boolean) => {
+  const handleRegister = (newUsername: string, isMasterUser?: boolean) => {
     localStorage.setItem('username', newUsername);
     localStorage.setItem('loginTime', Date.now().toString());
     setIsAuthenticated(true);
     setUsername(newUsername);
+    setIsMaster(isMasterUser || false);
     updateUserSession(newUsername);
     
-    if (isMaster) {
+    if (isMasterUser) {
       setShowMasterWelcome(true);
       setTimeout(() => {
         setShowMasterWelcome(false);
@@ -110,12 +142,94 @@ const Index = () => {
   };
 
   const handleAdminUnlock = () => {
-    if (adminPassword === 'denis222p') {
+    if (isMaster) {
+      setAdminUnlocked(true);
+      loadUsers();
+      return;
+    }
+    
+    const storedPassword = localStorage.getItem('adminPassword') || 'denis222p';
+    if (adminPassword === storedPassword) {
       setAdminUnlocked(true);
       loadUsers();
     } else {
       alert('Неверный пароль!');
     }
+  };
+
+  const handleChangeAdminPassword = () => {
+    if (newAdminPassword.length < 6) {
+      alert('Пароль должен быть минимум 6 символов!');
+      return;
+    }
+    localStorage.setItem('adminPassword', newAdminPassword);
+    setNewAdminPassword('');
+    alert('Пароль админ-панели успешно изменён!');
+  };
+
+  const handleAssignRole = () => {
+    if (!roleUsername) {
+      alert('Введите ник пользователя!');
+      return;
+    }
+    
+    if (roleUsername.toLowerCase() === 'anal_genius') {
+      alert('Невозможно назначить роль основателю!');
+      return;
+    }
+    
+    const storedUsers = localStorage.getItem('siteUsers');
+    const usersList = storedUsers ? JSON.parse(storedUsers) : [];
+    const userIndex = usersList.findIndex((u: any) => u.username.toLowerCase() === roleUsername.toLowerCase());
+    
+    if (userIndex === -1) {
+      alert('Пользователь не найден!');
+      return;
+    }
+    
+    if (roleType === 'moderator' && (roleLevel < 1 || roleLevel > 3)) {
+      alert('Уровень модератора: от 1 до 3!');
+      return;
+    }
+    
+    if (roleType === 'admin' && (roleLevel < 1 || roleLevel > 10)) {
+      alert('Уровень админа: от 1 до 10!');
+      return;
+    }
+    
+    usersList[userIndex].role = roleType;
+    usersList[userIndex].roleLevel = roleLevel;
+    localStorage.setItem('siteUsers', JSON.stringify(usersList));
+    setUsers(usersList);
+    setRoleUsername('');
+    alert(`Роль ${roleType} уровня ${roleLevel} назначена пользователю ${roleUsername}!`);
+  };
+
+  const handleBanUser = () => {
+    if (!banUsername) {
+      alert('Введите ник пользователя!');
+      return;
+    }
+    
+    if (banUsername.toLowerCase() === 'anal_genius') {
+      alert('Невозможно забанить основателя!');
+      return;
+    }
+    
+    const storedUsers = localStorage.getItem('siteUsers');
+    const usersList = storedUsers ? JSON.parse(storedUsers) : [];
+    const userIndex = usersList.findIndex((u: any) => u.username.toLowerCase() === banUsername.toLowerCase());
+    
+    if (userIndex === -1) {
+      alert('Пользователь не найден!');
+      return;
+    }
+    
+    usersList[userIndex].banned = true;
+    localStorage.setItem('siteUsers', JSON.stringify(usersList));
+    setUsers(usersList.filter((u: any) => !u.banned));
+    setBanUsername('');
+    alert(`Пользователь ${banUsername} заблокирован!`);
   };
 
   const handleLogout = () => {
@@ -131,6 +245,11 @@ const Index = () => {
   };
 
   const handleChangeUsername = () => {
+    if (isMaster) {
+      alert('Основатель не может изменить свой ник!');
+      return;
+    }
+    
     if (newUsername.trim().length < 3) {
       alert('Ник должен быть минимум 3 символа');
       return;
@@ -156,6 +275,10 @@ const Index = () => {
   };
 
   const getUserLevel = () => {
+    if (isMaster) {
+      return { level: 100, name: 'Основатель', color: 'text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-yellow-500 via-green-500 via-blue-500 to-purple-500 animate-rainbow' };
+    }
+    
     const loginTime = parseInt(localStorage.getItem('loginTime') || Date.now().toString());
     const sessionMinutes = Math.floor((Date.now() - loginTime) / 60000);
     
@@ -266,9 +389,15 @@ const Index = () => {
               <div className="relative">
                 <button
                   onClick={() => setShowAccountMenu(!showAccountMenu)}
-                  className="w-10 h-10 rounded-full bg-gradient-to-br from-destructive to-destructive/60 border-2 border-destructive flex items-center justify-center hover:scale-105 transition-transform"
+                  className={`w-10 h-10 rounded-full flex items-center justify-center hover:scale-105 transition-transform ${
+                    isMaster 
+                      ? 'bg-gradient-to-br from-red-500 via-yellow-500 via-green-500 via-blue-500 to-purple-500 p-0.5 animate-spin-slow' 
+                      : 'bg-gradient-to-br from-destructive to-destructive/60 border-2 border-destructive'
+                  }`}
                 >
-                  <Icon name="User" size={20} className="text-primary-foreground" />
+                  <div className={`w-full h-full rounded-full flex items-center justify-center ${isMaster ? 'bg-card' : ''}`}>
+                    <Icon name="User" size={20} className="text-primary-foreground" />
+                  </div>
                 </button>
                 
                 {showAccountMenu && (
@@ -285,7 +414,12 @@ const Index = () => {
                           </p>
                         </div>
                       </div>
-                      {vipActive && (
+                      {isMaster ? (
+                        <Badge className="mt-2 w-full justify-center animate-rainbow uppercase font-bold">
+                          <Icon name="Crown" size={12} className="mr-1" />
+                          Основатель
+                        </Badge>
+                      ) : vipActive && (
                         <Badge className="mt-2 w-full justify-center bg-purple-500">
                           <Icon name="Crown" size={12} className="mr-1" />
                           VIP Активен
@@ -294,17 +428,19 @@ const Index = () => {
                     </div>
                     
                     <div className="p-2">
-                      <Button
-                        variant="ghost"
-                        className="w-full justify-start"
-                        onClick={() => {
-                          setShowChangeUsername(true);
-                          setShowAccountMenu(false);
-                        }}
-                      >
-                        <Icon name="Edit" size={16} className="mr-2" />
-                        Сменить ник
-                      </Button>
+                      {!isMaster && (
+                        <Button
+                          variant="ghost"
+                          className="w-full justify-start"
+                          onClick={() => {
+                            setShowChangeUsername(true);
+                            setShowAccountMenu(false);
+                          }}
+                        >
+                          <Icon name="Edit" size={16} className="mr-2" />
+                          Сменить ник
+                        </Button>
+                      )}
                       
                       <Button
                         variant="ghost"
@@ -658,43 +794,315 @@ const Index = () => {
               </Button>
             </div>
           ) : (
-            <div className="space-y-4 max-h-96 overflow-y-auto">
-              <div className="border-l-4 border-purple-500 pl-4 py-2 bg-purple-900/20">
-                <h3 className="font-bold uppercase text-sm mb-1 text-purple-400">Статистика пользователей</h3>
-                <p className="text-xs text-muted-foreground">
-                  Всего зарегистрировано: {users.length}
-                </p>
-              </div>
+            <div className="space-y-4">
+              {isMaster && (
+                <div className="flex gap-2 border-b border-destructive/30 pb-2">
+                  <Button
+                    variant={adminPanelTab === 'users' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setAdminPanelTab('users')}
+                    className="flex-1"
+                  >
+                    <Icon name="Users" size={14} className="mr-1" />
+                    Пользователи
+                  </Button>
+                  <Button
+                    variant={adminPanelTab === 'roles' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setAdminPanelTab('roles')}
+                    className="flex-1"
+                  >
+                    <Icon name="Shield" size={14} className="mr-1" />
+                    Роли
+                  </Button>
+                  <Button
+                    variant={adminPanelTab === 'settings' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setAdminPanelTab('settings')}
+                    className="flex-1"
+                  >
+                    <Icon name="Settings" size={14} className="mr-1" />
+                    Настройки
+                  </Button>
+                </div>
+              )}
+              
+              <div className="max-h-96 overflow-y-auto">
+                {adminPanelTab === 'users' && (
+                  <div className="space-y-4">
+                    <div className="border-l-4 border-purple-500 pl-4 py-2 bg-purple-900/20">
+                      <h3 className="font-bold uppercase text-sm mb-1 text-purple-400">Статистика пользователей</h3>
+                      <p className="text-xs text-muted-foreground">
+                        Всего зарегистрировано: {users.length}
+                      </p>
+                    </div>
 
-              <div className="space-y-3">
-                {users.map((user, index) => (
-                  <Card key={index} className="border-border bg-secondary/30">
-                    <CardContent className="p-4">
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex items-start gap-3 flex-1">
-                          <div className="w-10 h-10 bg-destructive/20 flex items-center justify-center shrink-0 rounded">
-                            <Icon name="User" size={20} className="text-destructive" />
+                    {isMaster && (
+                      <Card className="border-destructive/50 bg-destructive/10">
+                        <CardContent className="p-3">
+                          <h4 className="text-xs uppercase font-bold mb-2 text-destructive">Бан пользователя</h4>
+                          <div className="flex gap-2">
+                            <Input
+                              type="text"
+                              placeholder="Ник пользователя..."
+                              value={banUsername}
+                              onChange={(e) => setBanUsername(e.target.value)}
+                              className="bg-secondary/50 border-destructive/30 text-sm"
+                            />
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              onClick={handleBanUser}
+                            >
+                              <Icon name="Ban" size={14} />
+                            </Button>
                           </div>
-                          <div className="flex-1 min-w-0">
-                            <h4 className="font-bold text-sm truncate">{user.username}</h4>
-                            <div className="flex flex-wrap gap-2 mt-2">
-                              <Badge 
-                                variant={user.vip ? "default" : "outline"}
-                                className={user.vip ? "bg-purple-500" : ""}
-                              >
-                                {user.vip ? "VIP" : "Обычный"}
-                              </Badge>
-                              <Badge variant="outline" className="text-xs">
-                                <Icon name="Clock" size={12} className="mr-1" />
-                                {formatDuration(user.sessionDuration)}
-                              </Badge>
+                        </CardContent>
+                      </Card>
+                    )}
+
+                    <div className="space-y-3">
+                      {users.map((user, index) => (
+                        <Card key={index} className="border-border bg-secondary/30">
+                          <CardContent className="p-4">
+                            <div className="flex items-start justify-between gap-4">
+                              <div className="flex items-start gap-3 flex-1">
+                                <div className="w-10 h-10 bg-destructive/20 flex items-center justify-center shrink-0 rounded">
+                                  <Icon name="User" size={20} className="text-destructive" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <h4 className="font-bold text-sm truncate">{user.username}</h4>
+                                  <div className="flex flex-wrap gap-2 mt-2">
+                                    {user.role && (
+                                      <Badge variant="default" className="bg-blue-600">
+                                        {user.role === 'moderator' ? 'Модератор' : 'Админ'} LVL {user.roleLevel}
+                                      </Badge>
+                                    )}
+                                    <Badge 
+                                      variant={user.vip ? "default" : "outline"}
+                                      className={user.vip ? "bg-purple-500" : ""}
+                                    >
+                                      {user.vip ? "VIP" : "Обычный"}
+                                    </Badge>
+                                    <Badge variant="outline" className="text-xs">
+                                      <Icon name="Clock" size={12} className="mr-1" />
+                                      {formatDuration(user.sessionDuration)}
+                                    </Badge>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
+                {adminPanelTab === 'roles' && isMaster && (
+                  <div className="space-y-4">
+                    <div className="border-l-4 border-blue-500 pl-4 py-2 bg-blue-900/20">
+                      <h3 className="font-bold uppercase text-sm mb-1 text-blue-400">Назначение ролей</h3>
+                      <p className="text-xs text-muted-foreground">
+                        Модераторы: уровни 1-3 • Админы: уровни 1-10
+                      </p>
+                    </div>
+                    
+                    <Card className="border-blue-500/50 bg-blue-900/10">
+                      <CardContent className="p-4 space-y-3">
+                        <div>
+                          <label className="text-xs uppercase text-muted-foreground mb-1 block">Ник пользователя</label>
+                          <Input
+                            type="text"
+                            placeholder="Введите ник..."
+                            value={roleUsername}
+                            onChange={(e) => setRoleUsername(e.target.value)}
+                            className="bg-secondary/50 border-blue-500/30"
+                          />
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <label className="text-xs uppercase text-muted-foreground mb-1 block">Тип роли</label>
+                            <select
+                              value={roleType}
+                              onChange={(e) => setRoleType(e.target.value as 'moderator' | 'admin')}
+                              className="w-full bg-secondary border border-blue-500/30 rounded px-2 py-1.5 text-sm"
+                            >
+                              <option value="moderator">Модератор</option>
+                              <option value="admin">Админ</option>
+                            </select>
+                          </div>
+                          
+                          <div>
+                            <label className="text-xs uppercase text-muted-foreground mb-1 block">Уровень</label>
+                            <Input
+                              type="number"
+                              min={1}
+                              max={roleType === 'moderator' ? 3 : 10}
+                              value={roleLevel}
+                              onChange={(e) => setRoleLevel(parseInt(e.target.value) || 1)}
+                              className="bg-secondary/50 border-blue-500/30"
+                            />
+                          </div>
+                        </div>
+                        
+                        <Button
+                          onClick={handleAssignRole}
+                          className="w-full bg-blue-600 hover:bg-blue-700"
+                        >
+                          <Icon name="UserPlus" size={16} className="mr-2" />
+                          Назначить роль
+                        </Button>
+                      </CardContent>
+                    </Card>
+                    
+                    <div className="border-t border-blue-500/30 pt-3">
+                      <h4 className="text-xs uppercase font-bold mb-2 text-blue-400">Текущие роли</h4>
+                      <div className="space-y-2">
+                        {users.filter(u => u.role).map((user, index) => (
+                          <div key={index} className="flex items-center justify-between p-2 bg-secondary/30 rounded">
+                            <span className="text-sm font-bold">{user.username}</span>
+                            <Badge variant="default" className="bg-blue-600">
+                              {user.role === 'moderator' ? 'Модератор' : 'Админ'} LVL {user.roleLevel}
+                            </Badge>
+                          </div>
+                        ))}
+                        {users.filter(u => u.role).length === 0 && (
+                          <p className="text-xs text-muted-foreground text-center py-2">Нет назначенных ролей</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+                
+                {adminPanelTab === 'settings' && isMaster && (
+                  <div className="space-y-4">
+                    <div className="border-l-4 border-green-500 pl-4 py-2 bg-green-900/20">
+                      <h3 className="font-bold uppercase text-sm mb-1 text-green-400">Настройки системы</h3>
+                      <p className="text-xs text-muted-foreground">
+                        Управление паролями и правами доступа
+                      </p>
+                    </div>
+                    
+                    <Card className="border-green-500/50 bg-green-900/10">
+                      <CardContent className="p-4 space-y-3">
+                        <h4 className="text-xs uppercase font-bold text-green-400">Изменить пароль админ-панели</h4>
+                        <Input
+                          type="password"
+                          placeholder="Новый пароль (минимум 6 символов)..."
+                          value={newAdminPassword}
+                          onChange={(e) => setNewAdminPassword(e.target.value)}
+                          className="bg-secondary/50 border-green-500/30"
+                        />
+                        <Button
+                          onClick={handleChangeAdminPassword}
+                          className="w-full bg-green-600 hover:bg-green-700"
+                        >
+                          <Icon name="Key" size={16} className="mr-2" />
+                          Сменить пароль
+                        </Button>
+                      </CardContent>
+                    </Card>
+                    
+                    <Card className="border-yellow-500/50 bg-yellow-900/10">
+                      <CardContent className="p-4 space-y-3">
+                        <h4 className="text-xs uppercase font-bold text-yellow-400">Права доступа по ролям</h4>
+                        <p className="text-xs text-muted-foreground mb-3">
+                          Укажите минимальный уровень для каждого действия
+                        </p>
+                        
+                        <div className="space-y-3">
+                          <div>
+                            <label className="text-xs uppercase text-muted-foreground mb-1 block">Модераторы</label>
+                            <div className="grid grid-cols-3 gap-2">
+                              <div>
+                                <label className="text-xs text-muted-foreground">Бан (LVL)</label>
+                                <Input
+                                  type="number"
+                                  min={1}
+                                  max={3}
+                                  value={permissions.moderator?.ban || 2}
+                                  onChange={(e) => setPermissions({...permissions, moderator: {...permissions.moderator, ban: parseInt(e.target.value) || 1}})}
+                                  className="bg-secondary/50 text-sm"
+                                />
+                              </div>
+                              <div>
+                                <label className="text-xs text-muted-foreground">Удаление</label>
+                                <Input
+                                  type="number"
+                                  min={1}
+                                  max={3}
+                                  value={permissions.moderator?.delete || 1}
+                                  onChange={(e) => setPermissions({...permissions, moderator: {...permissions.moderator, delete: parseInt(e.target.value) || 1}})}
+                                  className="bg-secondary/50 text-sm"
+                                />
+                              </div>
+                              <div>
+                                <label className="text-xs text-muted-foreground">Кик</label>
+                                <Input
+                                  type="number"
+                                  min={1}
+                                  max={3}
+                                  value={permissions.moderator?.kick || 1}
+                                  onChange={(e) => setPermissions({...permissions, moderator: {...permissions.moderator, kick: parseInt(e.target.value) || 1}})}
+                                  className="bg-secondary/50 text-sm"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <div>
+                            <label className="text-xs uppercase text-muted-foreground mb-1 block">Админы</label>
+                            <div className="grid grid-cols-3 gap-2">
+                              <div>
+                                <label className="text-xs text-muted-foreground">Бан (LVL)</label>
+                                <Input
+                                  type="number"
+                                  min={1}
+                                  max={10}
+                                  value={permissions.admin?.ban || 5}
+                                  onChange={(e) => setPermissions({...permissions, admin: {...permissions.admin, ban: parseInt(e.target.value) || 1}})}
+                                  className="bg-secondary/50 text-sm"
+                                />
+                              </div>
+                              <div>
+                                <label className="text-xs text-muted-foreground">Удаление</label>
+                                <Input
+                                  type="number"
+                                  min={1}
+                                  max={10}
+                                  value={permissions.admin?.delete || 3}
+                                  onChange={(e) => setPermissions({...permissions, admin: {...permissions.admin, delete: parseInt(e.target.value) || 1}})}
+                                  className="bg-secondary/50 text-sm"
+                                />
+                              </div>
+                              <div>
+                                <label className="text-xs text-muted-foreground">Кик</label>
+                                <Input
+                                  type="number"
+                                  min={1}
+                                  max={10}
+                                  value={permissions.admin?.kick || 1}
+                                  onChange={(e) => setPermissions({...permissions, admin: {...permissions.admin, kick: parseInt(e.target.value) || 1}})}
+                                  className="bg-secondary/50 text-sm"
+                                />
+                              </div>
                             </div>
                           </div>
                         </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+                        
+                        <Button
+                          onClick={savePermissions}
+                          className="w-full bg-yellow-600 hover:bg-yellow-700"
+                        >
+                          <Icon name="Save" size={16} className="mr-2" />
+                          Сохранить настройки
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
               </div>
             </div>
           )}
