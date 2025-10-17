@@ -90,17 +90,12 @@ const Index = () => {
     setUsers(usersList);
   };
 
-  const handleRegister = () => {
-    if (username.trim().length < 3) {
-      alert('Ник должен быть минимум 3 символа');
-      return;
-    }
-    
-    localStorage.setItem('username', username);
+  const handleRegister = (newUsername: string) => {
+    localStorage.setItem('username', newUsername);
     localStorage.setItem('loginTime', Date.now().toString());
     setIsAuthenticated(true);
-    setShowAuth(false);
-    updateUserSession(username);
+    setUsername(newUsername);
+    updateUserSession(newUsername);
   };
 
   const handleAdminUnlock = () => {
