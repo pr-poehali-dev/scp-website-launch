@@ -7,6 +7,7 @@ import BloodDrops from '@/components/BloodDrops';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import AuthScreen from '@/components/AuthScreen';
+import SnakeGame from '@/components/SnakeGame';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState<'home' | 'admins'>('home');
@@ -31,6 +32,7 @@ const Index = () => {
   const [roleLevel, setRoleLevel] = useState(1);
   const [banUsername, setBanUsername] = useState('');
   const [permissions, setPermissions] = useState<{[key: string]: {ban: number, delete: number, kick: number}}>({});
+  const [showSnakeGame, setShowSnakeGame] = useState(false);
 
   useEffect(() => {
     const storedUsername = localStorage.getItem('username');
@@ -765,11 +767,21 @@ const Index = () => {
       </main>
 
       <footer className="border-t border-destructive/30 mt-12 py-6 bg-card/50 backdrop-blur">
-        <div className="container mx-auto px-4 text-center">
-          <p className="text-xs text-muted-foreground uppercase tracking-widest mb-2">
-            SCP Foundation Internal System v<span className="redacted">█.█.█</span>
-          </p>
-          <p className="text-xs text-muted-foreground/70">
+        <div className="container mx-auto px-4">
+          <div className="flex justify-between items-center mb-2">
+            <p className="text-xs text-muted-foreground uppercase tracking-widest">
+              SCP Foundation Internal System v<span className="redacted">█.█.█</span>
+            </p>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowSnakeGame(true)}
+              className="text-green-500 hover:text-green-400 hover:bg-green-500/10 font-mono text-xs"
+            >
+              [TERMINAL]
+            </Button>
+          </div>
+          <p className="text-xs text-muted-foreground/70 text-center">
             Все данные классифицированы • Несанкционированный доступ запрещен
           </p>
         </div>
@@ -1172,6 +1184,8 @@ const Index = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      <SnakeGame open={showSnakeGame} onClose={() => setShowSnakeGame(false)} />
     </div>
   );
 };
