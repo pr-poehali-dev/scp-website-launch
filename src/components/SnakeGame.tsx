@@ -13,7 +13,7 @@ interface SnakeGameProps {
 
 const GRID_SIZE = 30;
 const CELL_SIZE = 10;
-const INITIAL_SPEED = 120;
+const INITIAL_SPEED = 200;
 
 const SnakeGame = ({ open, onClose }: SnakeGameProps) => {
   const [snake, setSnake] = useState<Position[]>([
@@ -151,8 +151,8 @@ const SnakeGame = ({ open, onClose }: SnakeGameProps) => {
         if (newHead.x === food.x && newHead.y === food.y) {
           setScore(prev => prev + 1);
           setFood(generateFood(newSnake));
-          if ((score + 1) % 5 === 0 && speed > 60) {
-            setSpeed(prev => Math.max(60, prev - 10));
+          if ((score + 1) % 5 === 0 && speed > 100) {
+            setSpeed(prev => Math.max(100, prev - 15));
           }
           return newSnake;
         }
@@ -225,12 +225,12 @@ const SnakeGame = ({ open, onClose }: SnakeGameProps) => {
                     key={index}
                     className="absolute"
                     style={{
-                      left: segment.x * CELL_SIZE,
-                      top: segment.y * CELL_SIZE,
-                      width: CELL_SIZE,
-                      height: CELL_SIZE,
+                      left: segment.x * CELL_SIZE + 1,
+                      top: segment.y * CELL_SIZE + 1,
+                      width: CELL_SIZE - 2,
+                      height: CELL_SIZE - 2,
                       backgroundColor: '#1a1a1a',
-                      boxShadow: '0 0 1px rgba(0,0,0,0.3)',
+                      borderRadius: '1px',
                     }}
                   />
                 ))}
