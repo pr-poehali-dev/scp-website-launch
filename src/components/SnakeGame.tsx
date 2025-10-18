@@ -220,20 +220,83 @@ const SnakeGame = ({ open, onClose }: SnakeGameProps) => {
                 }}
               >
                 {/* Змейка - пиксельная как в Nokia */}
-                {snake.map((segment, index) => (
-                  <div
-                    key={index}
-                    className="absolute"
-                    style={{
-                      left: segment.x * CELL_SIZE + 1,
-                      top: segment.y * CELL_SIZE + 1,
-                      width: CELL_SIZE - 2,
-                      height: CELL_SIZE - 2,
-                      backgroundColor: '#1a1a1a',
-                      borderRadius: '1px',
-                    }}
-                  />
-                ))}
+                {snake.map((segment, index) => {
+                  const prevSegment = index > 0 ? snake[index - 1] : null;
+                  const nextSegment = index < snake.length - 1 ? snake[index + 1] : null;
+                  
+                  // Определяем направление сегмента
+                  const isHorizontal = (prevSegment && prevSegment.y === segment.y) || 
+                                      (nextSegment && nextSegment.y === segment.y);
+                  
+                  return (
+                    <div
+                      key={index}
+                      className="absolute"
+                      style={{
+                        left: segment.x * CELL_SIZE,
+                        top: segment.y * CELL_SIZE,
+                        width: CELL_SIZE,
+                        height: CELL_SIZE,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      {/* Сегмент змейки с зубчиками */}
+                      <div style={{
+                        width: isHorizontal ? '10px' : '8px',
+                        height: isHorizontal ? '8px' : '10px',
+                        backgroundColor: '#1a1a1a',
+                        position: 'relative',
+                      }}>
+                        {/* Зубчики по краям */}
+                        {isHorizontal ? (
+                          <>
+                            {/* Верхний зубчик */}
+                            <div style={{
+                              position: 'absolute',
+                              top: '-1px',
+                              left: '3px',
+                              width: '4px',
+                              height: '1px',
+                              backgroundColor: '#1a1a1a',
+                            }} />
+                            {/* Нижний зубчик */}
+                            <div style={{
+                              position: 'absolute',
+                              bottom: '-1px',
+                              left: '3px',
+                              width: '4px',
+                              height: '1px',
+                              backgroundColor: '#1a1a1a',
+                            }} />
+                          </>
+                        ) : (
+                          <>
+                            {/* Левый зубчик */}
+                            <div style={{
+                              position: 'absolute',
+                              left: '-1px',
+                              top: '3px',
+                              width: '1px',
+                              height: '4px',
+                              backgroundColor: '#1a1a1a',
+                            }} />
+                            {/* Правый зубчик */}
+                            <div style={{
+                              position: 'absolute',
+                              right: '-1px',
+                              top: '3px',
+                              width: '1px',
+                              height: '4px',
+                              backgroundColor: '#1a1a1a',
+                            }} />
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
 
                 {/* Еда - крестик как в оригинале */}
                 <div
